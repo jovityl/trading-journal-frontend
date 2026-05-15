@@ -1,21 +1,15 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
-import type { BaseResponse, TradeDto } from '../types'
+import { pnlColor, formatPnl, formatDate, formatPrice } from '../utils/format'
+import { useTrade } from '../hooks/useTrades'
 
 function TradeDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const { data: trade, isLoading } = useQuery({
-    queryKey: ['trade', id],
-    queryFn: async () => {
-      const res = await api.get<BaseResponse<TradeDto>>(`/api/v1/trades/${id}`)
-      return res.data.data
-    },
-    enabled: !!id
-  })
+  const { data: trade, isLoading } = useTrade(id)
 
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/api/v1/trades/${id}`),
@@ -36,7 +30,6 @@ function TradeDetailPage() {
   if (!trade) return <p className="text-gray-400">Trade not found.</p>
 
   const apiBase = import.meta.env.VITE_API_BASE_URL
-  const pnlColor = trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
 
   return (
     <div className="space-y-6">
@@ -49,7 +42,7 @@ function TradeDetailPage() {
             ← Back to Trades
           </button>
           <h1 className="text-2xl font-bold">{trade.ticker} — {trade.optionType}</h1>
-          <p className="text-gray-400 text-sm">{new Date(trade.tradeDate).toLocaleDateString()}</p>
+          <p className="text-gray-400 text-sm">{formatDate(trade.tradeDate)}</p>
         </div>
         <button
           onClick={handleDelete}
@@ -62,8 +55,8 @@ function TradeDetailPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat label="P&L" value={`${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)}`} color={pnlColor} />
-        <Stat label="Entry → Exit" value={`$${trade.entryPrice.toFixed(2)} → $${trade.exitPrice.toFixed(2)}`} />
+        <Stat label="P&L" value={formatPnl(trade.pnl)} color={pnlColor(trade.pnl)} />
+        <Stat label="Entry → Exit" value={`${formatPrice(trade.entryPrice)} → ${formatPrice(trade.exitPrice)}`} />
         <Stat label="Quantity" value={trade.quantity.toString()} />
         <Stat label="DTE" value={`${trade.dte} days`} />
       </div>

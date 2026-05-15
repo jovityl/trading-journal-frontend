@@ -1,7 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import api from '../services/api'
-import type { BaseResponse, DashboardDto } from '../types'
+import { formatPnl } from '../utils/format'
+import { useDashboard } from '../hooks/useDashboard'
+import TradesTable from '../components/TradesTable'
 
 function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
@@ -14,13 +16,7 @@ function StatCard({ label, value, highlight }: { label: string; value: string; h
 
 function DashboardPage() {
   const queryClient = useQueryClient()
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboard'],
-    queryFn: async () => {
-      const res = await api.get<BaseResponse<DashboardDto>>('/api/v1/dashboard')
-      return res.data.data
-    }
-  })
+  const { data, isLoading, error } = useDashboard()
 
   const seedMutation = useMutation({
     mutationFn: () => api.post('/api/v1/trades/seed'),
@@ -47,8 +43,6 @@ function DashboardPage() {
   if (isLoading) return <p className="text-gray-400">Loading...</p>
   if (error) return <p className="text-red-400">Failed to load dashboard.</p>
   if (!data) return null
-
-  const pnlColor = (val: number) => val >= 0 ? 'text-green-400' : 'text-red-400'
 
   return (
     <div className="space-y-8">
@@ -88,12 +82,12 @@ function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Today's P&L"
-          value={`${data.todayPnl >= 0 ? '+' : ''}$${data.todayPnl.toFixed(2)}`}
+          value={formatPnl(data.todayPnl)}
           highlight={data.isDailyLossLimitHit}
         />
         <StatCard
           label="Monthly P&L"
-          value={`${data.monthlyPnl >= 0 ? '+' : ''}$${data.monthlyPnl.toFixed(2)}`}
+          value={formatPnl(data.monthlyPnl)}
         />
         <StatCard
           label="Win Rate"
@@ -133,32 +127,7 @@ function DashboardPage() {
         {data.recentTrades.length === 0 ? (
           <p className="text-gray-500 text-sm">No trades yet.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-gray-400 text-left border-b border-gray-800">
-                <th className="pb-3">Ticker</th>
-                <th className="pb-3">Type</th>
-                <th className="pb-3">Strategy</th>
-                <th className="pb-3">Date</th>
-                <th className="pb-3">P&L</th>
-                <th className="pb-3">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.recentTrades.map(trade => (
-                <tr key={trade.id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                  <td className="py-3 font-medium">{trade.ticker}</td>
-                  <td className="py-3 text-gray-400">{trade.optionType}</td>
-                  <td className="py-3 text-gray-400">{trade.strategy}</td>
-                  <td className="py-3 text-gray-400">{new Date(trade.tradeDate).toLocaleDateString()}</td>
-                  <td className={`py-3 font-medium ${pnlColor(trade.pnl)}`}>
-                    {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
-                  </td>
-                  <td className="py-3 text-gray-400">{trade.disciplineScore}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <TradesTable trades={data.recentTrades} compact />
         )}
       </div>
     </div>
