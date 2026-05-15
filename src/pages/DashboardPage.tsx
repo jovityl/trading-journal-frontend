@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import api from '../services/api'
 import type { BaseResponse, DashboardDto } from '../types'
@@ -13,6 +13,7 @@ function StatCard({ label, value, highlight }: { label: string; value: string; h
 }
 
 function DashboardPage() {
+  const queryClient = useQueryClient()
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
@@ -20,6 +21,28 @@ function DashboardPage() {
       return res.data.data
     }
   })
+
+  const seedMutation = useMutation({
+    mutationFn: () => api.post('/api/v1/trades/seed'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['trades'] })
+    }
+  })
+
+  const deleteAllMutation = useMutation({
+    mutationFn: () => api.delete('/api/v1/trades/all'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['trades'] })
+    }
+  })
+
+  const handleDeleteAll = () => {
+    if (confirm('Delete ALL trades? This cannot be undone.')) {
+      deleteAllMutation.mutate()
+    }
+  }
 
   if (isLoading) return <p className="text-gray-400">Loading...</p>
   if (error) return <p className="text-red-400">Failed to load dashboard.</p>
@@ -29,7 +52,25 @@ function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={() => seedMutation.mutate()}
+            disabled={seedMutation.isPending}
+            className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition"
+          >
+            {seedMutation.isPending ? 'Seeding...' : '🧪 Seed test data'}
+          </button>
+          <button
+            onClick={handleDeleteAll}
+            disabled={deleteAllMutation.isPending}
+            className="text-xs bg-red-900/50 hover:bg-red-900 text-red-300 px-3 py-1.5 rounded-lg transition"
+          >
+            {deleteAllMutation.isPending ? 'Deleting...' : '🗑 Delete all trades'}
+          </button>
+        </div>
+      </div>
 
       {/* Alerts */}
       {data.isDailyLossLimitHit && (
