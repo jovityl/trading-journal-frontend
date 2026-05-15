@@ -1,73 +1,97 @@
-# React + TypeScript + Vite
+# Trading Journal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> An AI-powered options trading journal that scores trade discipline using manual checks + Claude chart analysis.
 
-Currently, two official plugins are available:
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
+![Auth0](https://img.shields.io/badge/Auth0-EB5424?logo=auth0&logoColor=white)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📸 Screenshots
 
-## React Compiler
+### Dashboard
+![Dashboard](docs/dashboard.png)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Trade Detail with AI Feedback
+![Trade Detail](docs/trade-detail.png)
 
-## Expanding the ESLint configuration
+### Log a New Trade
+![New Trade](docs/new-trade.png)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ✨ Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 🔐 **Auth0 login** — Google + email/password
+- 📊 **Dashboard** — P&L, win rate, discipline score, 30-day chart, recent trades
+- 📝 **Trade logging** — full trade form with chart + IBKR screenshot upload
+- 🤖 **AI scoring** — Claude analyzes your chart and scores entry/exit quality (0-80)
+- ✅ **Discipline tracking** — manual ticks for stop loss, profit target, position sizing, DTE (0-20)
+- 🔍 **Filters** — by ticker, option type, strategy, date range
+- ⚙️ **Settings** — daily loss/profit limits with dashboard alerts
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🛠 Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Category | Technology |
+|----------|-----------|
+| Framework | React 18 + TypeScript |
+| Build | Vite |
+| Styling | Tailwind CSS |
+| Routing | React Router |
+| Data fetching | React Query (TanStack) |
+| Forms | React Hook Form |
+| Charts | Recharts |
+| Auth | Auth0 React SDK |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- The [backend](https://github.com/jovityl/trading-journal-backend) running locally
+- Auth0 account with a SPA application
+
+### Setup
+
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Create a `.env` file in the project root**
+   ```
+   VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+   VITE_AUTH0_CLIENT_ID=your-spa-client-id
+   VITE_AUTH0_AUDIENCE=https://trading-journal-api
+   VITE_API_BASE_URL=https://localhost:7160
+   ```
+
+3. **Configure Auth0** (in your Auth0 dashboard)
+   - Allowed Callback URLs: `http://localhost:5173`
+   - Allowed Logout URLs: `http://localhost:5173/login`
+   - Allowed Web Origins: `http://localhost:5173`
+   - Enable Refresh Token Rotation
+
+4. **Run the dev server**
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:5173](http://localhost:5173)
+
+## 📂 Project Structure
+
+```
+src/
+├── components/     # Reusable components (modals, etc)
+├── pages/          # Full pages (Dashboard, Trades, Settings...)
+├── layout/         # App shell (sidebar + main area)
+├── services/       # Axios API instance
+├── hooks/          # Custom React hooks (useAuthToken)
+├── types/          # TypeScript interfaces
+├── App.tsx         # Routing
+└── main.tsx        # Entry point + providers
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔗 Related
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- [Backend repository](https://github.com/jovityl/trading-journal-backend)
