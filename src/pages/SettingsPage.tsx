@@ -2,18 +2,9 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import api from '../services/api'
-import type { BaseResponse } from '../types'
+import { usersService } from '../services/usersService'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { Skeleton } from '../components/Skeleton'
-
-interface UserDto {
-  id: string
-  email: string
-  displayName: string
-  dailyLossLimit: number
-  dailyProfitTarget: number
-}
 
 interface FormData {
   dailyLossLimit: number
@@ -27,10 +18,7 @@ function SettingsPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['me'],
-    queryFn: async () => {
-      const res = await api.get<BaseResponse<UserDto>>('/api/v1/users/me')
-      return res.data.data
-    }
+    queryFn: () => usersService.getMe(),
   })
 
   // prefill the form once user data loads
@@ -44,7 +32,7 @@ function SettingsPage() {
   }, [data, reset])
 
   const mutation = useMutation({
-    mutationFn: (formData: FormData) => api.put('/api/v1/users/limits', formData),
+    mutationFn: (formData: FormData) => usersService.updateLimits(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })

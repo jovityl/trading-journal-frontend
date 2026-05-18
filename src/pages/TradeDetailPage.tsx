@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import api from '../services/api'
+import { tradesService } from '../services/tradesService'
 import { confirmAction } from '../utils/confirm'
 import { pnlColor, formatPnl, formatDate, formatPrice } from '../utils/format'
 import { useTrade } from '../hooks/useTrades'
@@ -19,7 +19,7 @@ function TradeDetailPage() {
   usePageTitle(trade ? `${trade.ticker} – Trade` : 'Trade')
 
   const deleteMutation = useMutation({
-    mutationFn: () => api.delete(`/api/v1/trades/${id}`),
+    mutationFn: () => tradesService.remove(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })

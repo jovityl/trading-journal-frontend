@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import api, { setAuthToken } from '../services/api'
+import { setAuthToken } from '../services/api'
+import { usersService } from '../services/usersService'
 
 function useAuthToken() {
   const { getAccessTokenSilently, isAuthenticated, user } = useAuth0()
@@ -12,9 +13,9 @@ function useAuthToken() {
       const token = await getAccessTokenSilently()
       setAuthToken(token)
 
-      await api.post('/api/v1/users', {
-        email: user.email,
-        displayName: user.name ?? user.email,
+      await usersService.create({
+        email: user.email ?? '',
+        displayName: user.name ?? user.email ?? '',
       })
     }
 

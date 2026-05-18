@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import api from '../services/api'
+import { tradesService } from '../services/tradesService'
 import FileDropzone from './FileDropzone'
 
 interface CreateTradeModalProps {
@@ -59,7 +59,7 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
       if (data.ibkrScreenshot?.[0]) formData.append('IbkrScreenshot', data.ibkrScreenshot[0])
       if (data.chartScreenshot?.[0]) formData.append('ChartScreenshot', data.chartScreenshot[0])
 
-      return api.post('/api/v1/trades', formData)
+      return tradesService.create(formData)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] })

@@ -48,7 +48,7 @@ const FileDropzone = forwardRef<HTMLInputElement, FileDropzoneProps>(({ ...rest 
       <Upload size={20} className={isDragOver ? 'text-blue-400' : 'text-gray-500'} />
       {fileName ? (
         <div className="flex items-center gap-2 text-sm text-white">
-          <span className="truncate max-w-[180px]">{fileName}</span>
+          <span className="truncate max-w-45">{fileName}</span>
           <button onClick={handleClear} className="text-gray-400 hover:text-white">
             <X size={14} />
           </button>

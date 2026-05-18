@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Send, Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import api from '../services/api'
-import type { BaseResponse } from '../types'
+import { tradesService } from '../services/tradesService'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -20,12 +19,7 @@ function TradeChat({ tradeId }: TradeChatProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const mutation = useMutation({
-    mutationFn: async (newMessages: Message[]) => {
-      const res = await api.post<BaseResponse<string>>(`/api/v1/trades/${tradeId}/chat`, {
-        messages: newMessages,
-      })
-      return res.data.data
-    },
+    mutationFn: (newMessages: Message[]) => tradesService.chat(tradeId, newMessages),
     onSuccess: (reply) => {
       setMessages(prev => [...prev, { role: 'assistant', content: reply }])
     }
@@ -60,12 +54,14 @@ function TradeChat({ tradeId }: TradeChatProps) {
         )}
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-4 py-2 rounded-lg text-sm prose prose-sm prose-invert max-w-none ${
+            <div className={`max-w-[80%] px-4 py-2 rounded-lg text-sm ${
               m.role === 'user'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-800 text-gray-200'
             }`}>
-              <ReactMarkdown>{m.content}</ReactMarkdown>
+              <div className="prose prose-sm prose-invert max-w-none">
+                <ReactMarkdown>{m.content}</ReactMarkdown>
+              </div>
             </div>
           </div>
         ))}

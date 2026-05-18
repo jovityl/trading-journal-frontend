@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { CircleDollarSign, PiggyBank, Trophy, Target } from 'lucide-react'
 import toast from 'react-hot-toast'
-import api from '../services/api'
+import { tradesService } from '../services/tradesService'
 import { confirmAction } from '../utils/confirm'
 import { formatPnl, pnlColor, rateColor, scoreColor } from '../utils/format'
 import { useDashboard } from '../hooks/useDashboard'
@@ -30,7 +30,7 @@ function DashboardPage() {
   const { data, isLoading, error } = useDashboard()
 
   const seedMutation = useMutation({
-    mutationFn: () => api.post('/api/v1/trades/seed'),
+    mutationFn: () => tradesService.seed(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trades'] })
@@ -40,7 +40,7 @@ function DashboardPage() {
   })
 
   const deleteAllMutation = useMutation({
-    mutationFn: () => api.delete('/api/v1/trades/all'),
+    mutationFn: () => tradesService.removeAll(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trades'] })
