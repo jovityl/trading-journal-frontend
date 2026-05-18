@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import TradesPage from './pages/TradesPage'
 import TradeDetailPage from './pages/TradeDetailPage'
 import SettingsPage from './pages/SettingsPage'
+import AdminPromptsPage from './pages/AdminPromptsPage'
 import LoginPage from './pages/LoginPage'
 import Layout from './layout/Layout'
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="trades" element={<TradesPage />} />
           <Route path="trades/:id" element={<TradeDetailPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="admin" element={<AdminPromptsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { CircleDollarSign, PiggyBank, Trophy, Target } from 'lucide-react'
+import { Wallet, CircleDollarSign, PiggyBank, Trophy, Target } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { tradesService } from '../services/tradesService'
 import { confirmAction } from '../utils/confirm'
@@ -59,46 +59,30 @@ function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-4">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <div className="flex items-baseline gap-2">
-            <span className="text-xs text-gray-500 uppercase tracking-wide">Total P&L</span>
-            <span className={`text-lg font-semibold ${pnlColor(data.totalPnl)}`}>{formatPnl(data.totalPnl)}</span>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => seedMutation.mutate()}
-            disabled={seedMutation.isPending}
-            className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition"
-          >
-            {seedMutation.isPending ? 'Seeding...' : '🧪 Seed test data'}
-          </button>
-          <button
-            onClick={handleDeleteAll}
-            disabled={deleteAllMutation.isPending}
-            className="text-xs bg-red-900/50 hover:bg-red-900 text-red-300 px-3 py-1.5 rounded-lg transition"
-          >
-            {deleteAllMutation.isPending ? 'Deleting...' : '🗑 Delete all trades'}
-          </button>
-        </div>
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => seedMutation.mutate()}
+          disabled={seedMutation.isPending}
+          className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition"
+        >
+          {seedMutation.isPending ? 'Seeding...' : '🧪 Seed test data'}
+        </button>
+        <button
+          onClick={handleDeleteAll}
+          disabled={deleteAllMutation.isPending}
+          className="text-xs bg-red-900/50 hover:bg-red-900 text-red-300 px-3 py-1.5 rounded-lg transition"
+        >
+          {deleteAllMutation.isPending ? 'Deleting...' : '🗑 Delete all trades'}
+        </button>
       </div>
 
-      {/* Alerts */}
-      {data.isDailyLossLimitHit && (
-        <div className="bg-red-900/40 border border-red-500 text-red-300 px-4 py-3 rounded-lg">
-          ⚠️ Daily loss limit hit (${data.dailyLossLimit}). Consider stopping for the day.
-        </div>
-      )}
-      {data.isDailyProfitTargetHit && (
-        <div className="bg-green-900/40 border border-green-500 text-green-300 px-4 py-3 rounded-lg">
-          🎯 Daily profit target reached (${data.dailyProfitTarget}). Great job!
-        </div>
-      )}
-
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard
+          label="Total P&L"
+          value={formatPnl(data.totalPnl)}
+          icon={<Wallet size={18} />}
+        />
         <StatCard
           label="Today's P&L"
           value={formatPnl(data.todayPnl)}
@@ -125,6 +109,18 @@ function DashboardPage() {
           valueColor={scoreColor(data.averageDisciplineScore)}
         />
       </div>
+
+      {/* Alerts */}
+      {data.isDailyLossLimitHit && (
+        <div className="bg-red-900/40 border border-red-500 text-red-300 px-4 py-3 rounded-lg">
+          ⚠️ Daily loss limit hit (${data.dailyLossLimit}). Consider stopping for the day.
+        </div>
+      )}
+      {data.isDailyProfitTargetHit && (
+        <div className="bg-green-900/40 border border-green-500 text-green-300 px-4 py-3 rounded-lg">
+          🎯 Daily profit target reached (${data.dailyProfitTarget}). Great job!
+        </div>
+      )}
 
       {/* P&L Chart */}
       <div className="bg-gray-900 rounded-xl p-6">
