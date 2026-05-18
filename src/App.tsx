@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+import { Toaster } from 'react-hot-toast'
 import DashboardPage from './pages/DashboardPage'
 import TradesPage from './pages/TradesPage'
 import TradeDetailPage from './pages/TradeDetailPage'
@@ -20,6 +21,14 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: { background: '#1f2937', color: '#fff', border: '1px solid #374151' },
+          success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+        }}
+      />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route

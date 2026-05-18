@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTrades } from '../hooks/useTrades'
 import type { TradeFilters } from '../hooks/useTrades'
+import { usePageTitle } from '../hooks/usePageTitle'
 import CreateTradeModal from '../components/CreateTradeModal'
 import TradesTable from '../components/TradesTable'
+import { TableSkeleton } from '../components/Skeleton'
 
 const emptyFilters: TradeFilters = {
   ticker: '',
@@ -14,6 +16,7 @@ const emptyFilters: TradeFilters = {
 }
 
 function TradesPage() {
+  usePageTitle('Trades')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [filters, setFilters] = useState<TradeFilters>(emptyFilters)
   const navigate = useNavigate()
@@ -90,12 +93,35 @@ function TradesPage() {
       </div>
 
       <div className="bg-gray-900 rounded-xl p-6">
-        {isLoading && <p className="text-gray-400">Loading...</p>}
+        {isLoading && <TableSkeleton />}
         {error && <p className="text-red-400">Failed to load trades.</p>}
         {data && data.length === 0 && (
-          <p className="text-gray-500 text-sm">
-            {hasActiveFilters ? 'No trades match your filters.' : 'No trades yet. Log your first trade!'}
-          </p>
+          <div className="text-center py-12">
+            <div className="text-4xl mb-3">📈</div>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              {hasActiveFilters ? 'No matching trades' : 'No trades yet'}
+            </h3>
+            <p className="text-gray-400 text-sm mb-6">
+              {hasActiveFilters
+                ? 'Try adjusting your filters.'
+                : 'Log your first trade to start building your discipline score.'}
+            </p>
+            {hasActiveFilters ? (
+              <button
+                onClick={() => setFilters(emptyFilters)}
+                className="bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+              >
+                Clear filters
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg transition"
+              >
+                + Log first trade
+              </button>
+            )}
+          </div>
         )}
         {data && data.length > 0 && (
           <TradesTable

@@ -1,21 +1,32 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link, useNavigate } from 'react-router-dom'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { CircleDollarSign, PiggyBank, Trophy, Target } from 'lucide-react'
+import toast from 'react-hot-toast'
 import api from '../services/api'
-import { formatPnl } from '../utils/format'
+import { confirmAction } from '../utils/confirm'
+import { formatPnl, pnlColor, rateColor, scoreColor } from '../utils/format'
 import { useDashboard } from '../hooks/useDashboard'
+import { usePageTitle } from '../hooks/usePageTitle'
 import TradesTable from '../components/TradesTable'
+import { DashboardSkeleton } from '../components/Skeleton'
 
-function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function StatCard({ label, value, icon, valueColor, highlight }: { label: string; value: string; icon: React.ReactNode; valueColor?: string; highlight?: boolean }) {
   return (
-    <div className={`bg-gray-900 rounded-xl p-6 ${highlight ? 'border border-red-500' : ''}`}>
-      <p className="text-gray-400 text-sm mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white">{value}</p>
+    <div className={`bg-gray-900 rounded-xl p-6 transition-all duration-200 hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg ${highlight ? 'border border-red-500' : 'border border-transparent'}`}>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-gray-400 text-sm">{label}</p>
+        <div className="text-gray-500">{icon}</div>
+      </div>
+      <p className={`text-2xl font-bold ${valueColor ?? 'text-white'}`}>{value}</p>
     </div>
   )
 }
 
 function DashboardPage() {
+  usePageTitle('Dashboard')
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const { data, isLoading, error } = useDashboard()
 
   const seedMutation = useMutation({
@@ -23,7 +34,9 @@ function DashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trades'] })
-    }
+      toast.success('Seeded test data')
+    },
+    onError: () => toast.error('Failed to seed data')
   })
 
   const deleteAllMutation = useMutation({
@@ -31,23 +44,29 @@ function DashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['trades'] })
-    }
+      toast.success('All trades deleted')
+    },
+    onError: () => toast.error('Failed to delete trades')
   })
 
   const handleDeleteAll = () => {
-    if (confirm('Delete ALL trades? This cannot be undone.')) {
-      deleteAllMutation.mutate()
-    }
+    confirmAction('Delete ALL trades? This cannot be undone.', () => deleteAllMutation.mutate())
   }
 
-  if (isLoading) return <p className="text-gray-400">Loading...</p>
+  if (isLoading) return <DashboardSkeleton />
   if (error) return <p className="text-red-400">Failed to load dashboard.</p>
   if (!data) return null
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <div className="flex items-baseline gap-4">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <div className="flex items-baseline gap-2">
+            <span className="text-xs text-gray-500 uppercase tracking-wide">Total P&L</span>
+            <span className={`text-lg font-semibold ${pnlColor(data.totalPnl)}`}>{formatPnl(data.totalPnl)}</span>
+          </div>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => seedMutation.mutate()}
@@ -83,19 +102,27 @@ function DashboardPage() {
         <StatCard
           label="Today's P&L"
           value={formatPnl(data.todayPnl)}
+          icon={<CircleDollarSign size={18} />}
+          valueColor={pnlColor(data.todayPnl)}
           highlight={data.isDailyLossLimitHit}
         />
         <StatCard
           label="Monthly P&L"
           value={formatPnl(data.monthlyPnl)}
+          icon={<PiggyBank size={18} />}
+          valueColor={pnlColor(data.monthlyPnl)}
         />
         <StatCard
           label="Win Rate"
           value={`${data.winRate}%`}
+          icon={<Trophy size={18} />}
+          valueColor={rateColor(data.winRate)}
         />
         <StatCard
           label="Avg Discipline Score"
           value={`${data.averageDisciplineScore}/100`}
+          icon={<Target size={18} />}
+          valueColor={scoreColor(data.averageDisciplineScore)}
         />
       </div>
 
@@ -113,7 +140,7 @@ function DashboardPage() {
               <Tooltip
                 contentStyle={{ backgroundColor: '#111827', border: 'none' }}
                 labelStyle={{ color: '#9ca3af' }}
-                formatter={(val: number) => [`$${val.toFixed(2)}`, 'P&L']}
+                formatter={(val) => [`$${Number(val).toFixed(2)}`, 'P&L']}
               />
               <Line type="monotone" dataKey="pnl" stroke="#3b82f6" strokeWidth={2} dot={false} />
             </LineChart>
@@ -125,9 +152,22 @@ function DashboardPage() {
       <div className="bg-gray-900 rounded-xl p-6">
         <h2 className="text-lg font-semibold mb-4">Recent Trades</h2>
         {data.recentTrades.length === 0 ? (
-          <p className="text-gray-500 text-sm">No trades yet.</p>
+          <div className="text-center py-10">
+            <div className="text-3xl mb-2">📊</div>
+            <p className="text-gray-400 text-sm mb-4">No trades yet.</p>
+            <Link
+              to="/trades"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              + Log a trade
+            </Link>
+          </div>
         ) : (
-          <TradesTable trades={data.recentTrades} compact />
+          <TradesTable
+            trades={data.recentTrades}
+            compact
+            onRowClick={trade => navigate(`/trades/${trade.id}`)}
+          />
         )}
       </div>
     </div>

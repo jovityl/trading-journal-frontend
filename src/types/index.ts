@@ -34,6 +34,7 @@ export interface ScoreChartDto {
 }
 
 export interface DashboardDto {
+  totalPnl: number
   todayPnl: number
   monthlyPnl: number
   winRate: number

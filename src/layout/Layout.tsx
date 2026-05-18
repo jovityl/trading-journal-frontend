@@ -1,5 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+import { CandlestickChart } from 'lucide-react'
 import useAuthToken from '../hooks/useAuthToken'
 
 function Layout() {
@@ -10,7 +11,12 @@ function Layout() {
     <div className="flex h-screen bg-gray-950 text-white">
       {/* Sidebar */}
       <aside className="w-56 bg-gray-900 flex flex-col p-6">
-        <h1 className="text-xl font-bold mb-10">📈 TJ</h1>
+        <div className="flex items-center gap-2 mb-10">
+          <div className="bg-blue-600/20 p-1.5 rounded-lg">
+            <CandlestickChart className="text-blue-400" size={20} />
+          </div>
+          <h1 className="text-base font-bold">Trading Journal</h1>
+        </div>
         <nav className="flex flex-col gap-2 flex-1">
           <NavLink
             to="/dashboard"

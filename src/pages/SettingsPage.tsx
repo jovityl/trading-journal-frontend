@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import api from '../services/api'
 import type { BaseResponse } from '../types'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { Skeleton } from '../components/Skeleton'
 
 interface UserDto {
   id: string
@@ -18,6 +21,7 @@ interface FormData {
 }
 
 function SettingsPage() {
+  usePageTitle('Settings')
   const queryClient = useQueryClient()
   const { register, handleSubmit, reset } = useForm<FormData>()
 
@@ -44,10 +48,17 @@ function SettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-    }
+      toast.success('Settings saved')
+    },
+    onError: () => toast.error('Failed to save settings')
   })
 
-  if (isLoading) return <p className="text-gray-400">Loading...</p>
+  if (isLoading) return (
+    <div className="max-w-lg space-y-6">
+      <Skeleton className="h-8 w-32" />
+      <Skeleton className="h-64" />
+    </div>
+  )
 
   return (
     <div className="max-w-lg space-y-6">
