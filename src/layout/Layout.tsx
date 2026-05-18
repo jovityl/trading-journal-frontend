@@ -2,10 +2,12 @@ import { Outlet, NavLink } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { CandlestickChart } from 'lucide-react'
 import useAuthToken from '../hooks/useAuthToken'
+import { useMe } from '../hooks/useMe'
 
 function Layout() {
   const { logout, user } = useAuth0()
   useAuthToken()
+  const { data: me } = useMe()
 
   return (
     <div className="flex h-screen bg-gray-950 text-white">
@@ -42,6 +44,17 @@ function Layout() {
           >
             Settings
           </NavLink>
+
+          {me?.isAdmin && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg text-sm font-medium transition mt-4 ${isActive ? 'bg-purple-600 text-white' : 'text-purple-400 hover:bg-gray-800'}`
+              }
+            >
+              Admin
+            </NavLink>
+          )}
         </nav>
         <div className="mt-auto">
           <p className="text-xs text-gray-500 mb-3 truncate">{user?.email}</p>

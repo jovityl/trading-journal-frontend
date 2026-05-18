@@ -7,6 +7,7 @@ export interface UserDto {
   displayName: string
   dailyLossLimit: number
   dailyProfitTarget: number
+  isAdmin: boolean
 }
 
 export interface UpdateLimitsPayload {
