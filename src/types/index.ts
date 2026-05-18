@@ -44,6 +44,7 @@ export interface DashboardDto {
   dailyLossLimit: number
   dailyProfitTarget: number
   pnlChart: PnlChartDto[]
+  equityCurve: PnlChartDto[]
   scoreChart: ScoreChartDto[]
   recentTrades: TradeDto[]
 }

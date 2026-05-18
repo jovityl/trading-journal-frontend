@@ -7,6 +7,36 @@ export interface PromptDto {
   updatedAt: string
 }
 
+export interface UserUsageDto {
+  userId: string
+  email: string
+  totalCalls: number
+  totalInputTokens: number
+  totalOutputTokens: number
+  totalCost: number
+}
+
+export interface UsageCallDto {
+  id: string
+  email: string
+  endpoint: string
+  model: string
+  inputTokens: number
+  outputTokens: number
+  cacheReadTokens: number
+  cost: number
+  createdAt: string
+}
+
+export interface UsageSummaryDto {
+  totalCalls: number
+  totalInputTokens: number
+  totalOutputTokens: number
+  totalCost: number
+  perUser: UserUsageDto[]
+  recentCalls: UsageCallDto[]
+}
+
 export const adminService = {
   async getPrompts(): Promise<PromptDto[]> {
     const res = await api.get<BaseResponse<PromptDto[]>>('/api/v1/admin/prompts')
@@ -15,6 +45,11 @@ export const adminService = {
 
   async updatePrompt(key: string, content: string): Promise<PromptDto> {
     const res = await api.put<BaseResponse<PromptDto>>(`/api/v1/admin/prompts/${key}`, { content })
+    return res.data.data
+  },
+
+  async getUsage(): Promise<UsageSummaryDto> {
+    const res = await api.get<BaseResponse<UsageSummaryDto>>('/api/v1/admin/usage')
     return res.data.data
   },
 }

@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts'
 import { Wallet, CircleDollarSign, PiggyBank, Trophy, Target } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { tradesService } from '../services/tradesService'
@@ -23,11 +24,14 @@ function StatCard({ label, value, icon, valueColor, highlight }: { label: string
   )
 }
 
+type ChartMode = 'equity' | 'daily'
+
 function DashboardPage() {
   usePageTitle('Dashboard')
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { data, isLoading, error } = useDashboard()
+  const [chartMode, setChartMode] = useState<ChartMode>('equity')
 
   const seedMutation = useMutation({
     mutationFn: () => tradesService.seed(),
@@ -122,25 +126,68 @@ function DashboardPage() {
         </div>
       )}
 
-      {/* P&L Chart */}
+      {/* Chart with toggle */}
       <div className="bg-gray-900 rounded-xl p-6">
-        <h2 className="text-lg font-semibold mb-4">P&L — Last 30 Days</h2>
-        {data.pnlChart.length === 0 ? (
-          <p className="text-gray-500 text-sm">No data yet.</p>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">
+            {chartMode === 'equity' ? 'Equity Curve' : 'Daily P&L — Last 30 Days'}
+          </h2>
+          <div className="flex bg-gray-800 rounded-lg p-1">
+            <button
+              onClick={() => setChartMode('equity')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition ${chartMode === 'equity' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              Equity
+            </button>
+            <button
+              onClick={() => setChartMode('daily')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition ${chartMode === 'daily' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              Daily
+            </button>
+          </div>
+        </div>
+
+        {chartMode === 'equity' ? (
+          (data.equityCurve ?? []).length === 0 ? (
+            <p className="text-gray-500 text-sm">No data yet.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={data.equityCurve}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#111827', border: 'none' }}
+                  labelStyle={{ color: '#9ca3af' }}
+                  formatter={(val) => [`$${Number(val).toFixed(2)}`, 'Cumulative P&L']}
+                />
+                <Line type="monotone" dataKey="pnl" stroke="#3b82f6" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          )
         ) : (
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={data.pnlChart}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 12 }} />
-              <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#111827', border: 'none' }}
-                labelStyle={{ color: '#9ca3af' }}
-                formatter={(val) => [`$${Number(val).toFixed(2)}`, 'P&L']}
-              />
-              <Line type="monotone" dataKey="pnl" stroke="#3b82f6" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+          data.pnlChart.length === 0 ? (
+            <p className="text-gray-500 text-sm">No data yet.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={data.pnlChart}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#111827', border: 'none' }}
+                  labelStyle={{ color: '#9ca3af' }}
+                  formatter={(val) => [`$${Number(val).toFixed(2)}`, 'P&L']}
+                />
+                <Bar dataKey="pnl">
+                  {data.pnlChart.map((entry, i) => (
+                    <Cell key={i} fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )
         )}
       </div>
 

@@ -6,6 +6,7 @@ import TradesPage from './pages/TradesPage'
 import TradeDetailPage from './pages/TradeDetailPage'
 import SettingsPage from './pages/SettingsPage'
 import AdminPromptsPage from './pages/AdminPromptsPage'
+import AdminUsagePage from './pages/AdminUsagePage'
 import LoginPage from './pages/LoginPage'
 import Layout from './layout/Layout'
 
@@ -42,6 +43,8 @@ function App() {
           <Route path="trades/:id" element={<TradeDetailPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="admin" element={<AdminPromptsPage />} />
+          <Route path="admin/prompts" element={<AdminPromptsPage />} />
+          <Route path="admin/usage" element={<AdminUsagePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

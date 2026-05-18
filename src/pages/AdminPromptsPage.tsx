@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { adminService } from '../services/adminService'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { Skeleton } from '../components/Skeleton'
+import AdminTabs from '../components/AdminTabs'
 
 function AdminPromptsPage() {
   usePageTitle('Admin · Prompts')
@@ -44,6 +45,7 @@ function AdminPromptsPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <AdminTabs />
       <div>
         <h1 className="text-2xl font-bold">Prompts</h1>
         <p className="text-gray-400 text-sm mt-1">
