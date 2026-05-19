@@ -14,11 +14,7 @@ export interface TradeDto {
   chartScreenshotUrl?: string
   aiScore: number
   aiFeedback?: string
-  entryQuality: number
-  exitQuality: number
-  riskManagement: number
-  planAdherence: number
-  tickedScore: number
+  violationTags: string[]
   disciplineScore: number
   createdAt: string
 }

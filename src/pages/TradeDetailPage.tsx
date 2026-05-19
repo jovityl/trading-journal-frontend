@@ -90,19 +90,35 @@ function TradeDetailPage() {
         <Stat label="DTE" value={`${trade.dte} days`} />
       </div>
 
-      {/* Discipline */}
+      {/* Scores */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-gray-900 rounded-xl p-6">
+          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">AI Chart Score</p>
+          <p className="text-3xl font-bold text-white">{trade.aiScore}<span className="text-lg text-gray-500">/100</span></p>
+        </div>
+        <div className="bg-gray-900 rounded-xl p-6">
+          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Discipline Score</p>
+          <p className="text-3xl font-bold text-white">{trade.disciplineScore}<span className="text-lg text-gray-500">/100</span></p>
+        </div>
+      </div>
+
+      {/* Violation Tags */}
       <div className="bg-gray-900 rounded-xl p-6">
-        <h2 className="text-lg font-semibold mb-4">Discipline Score: {trade.disciplineScore}/100</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-          <RatingRow label="Entry quality" value={trade.entryQuality} />
-          <RatingRow label="Exit quality" value={trade.exitQuality} />
-          <RatingRow label="Risk management" value={trade.riskManagement} />
-          <RatingRow label="Plan adherence" value={trade.planAdherence} />
-        </div>
-        <div className="mt-4 pt-4 border-t border-gray-800 text-sm text-gray-400">
-          <p>Self-rating: {trade.tickedScore}/20</p>
-          <p>AI score: {trade.aiScore}/80</p>
-        </div>
+        <h2 className="text-lg font-semibold mb-3">Discipline</h2>
+        {trade.violationTags.length === 0 ? (
+          <p className="text-green-400 text-sm font-medium">Clean trade — no violations</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {trade.violationTags.map(tag => (
+              <span
+                key={tag}
+                className="px-3 py-1.5 rounded-full text-sm font-medium bg-red-500/20 border border-red-500 text-red-300"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Notes */}
@@ -167,17 +183,6 @@ function Stat({ label, value, color }: { label: string; value: string; color?: s
     <div className="bg-gray-900 rounded-xl p-4 transition-all duration-200 hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg">
       <p className="text-gray-400 text-xs mb-1">{label}</p>
       <p className={`text-lg font-bold ${color ?? 'text-white'}`}>{value}</p>
-    </div>
-  )
-}
-
-function RatingRow({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="text-gray-400">{label}</span>
-      <span className="text-yellow-400 font-mono">
-        {'★'.repeat(value)}{'☆'.repeat(5 - value)}
-      </span>
     </div>
   )
 }

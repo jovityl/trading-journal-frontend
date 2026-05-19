@@ -1,9 +1,20 @@
 import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { tradesService } from '../services/tradesService'
 import FileDropzone from './FileDropzone'
+
+const VIOLATION_TAGS = [
+  'Revenge Trade',
+  'FOMO Entry',
+  'Oversized Position',
+  'Early Exit',
+  'Late Exit',
+  'Chased Entry',
+  'No Clear Setup',
+  'Broke Profit Target',
+  'Overtraded',
+]
 
 interface CreateTradeModalProps {
   onClose: () => void
@@ -21,10 +32,7 @@ interface FormData {
   dte: number
   tradeDate: string
   notes?: string
-  entryQuality: number
-  exitQuality: number
-  riskManagement: number
-  planAdherence: number
+  violationTags: string[]
   ibkrScreenshot?: FileList
   chartScreenshot?: FileList
 }
@@ -36,10 +44,7 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
       tradeDate: new Date().toISOString().split('T')[0],
       optionType: 'Call',
       strategy: 'Breakout + Retest',
-      entryQuality: 3,
-      exitQuality: 3,
-      riskManagement: 3,
-      planAdherence: 3,
+      violationTags: [],
     }
   })
 
@@ -54,10 +59,7 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
       formData.append('Quantity', data.quantity.toString())
       formData.append('Dte', data.dte.toString())
       formData.append('TradeDate', new Date(data.tradeDate).toISOString())
-      formData.append('EntryQuality', data.entryQuality.toString())
-      formData.append('ExitQuality', data.exitQuality.toString())
-      formData.append('RiskManagement', data.riskManagement.toString())
-      formData.append('PlanAdherence', data.planAdherence.toString())
+      data.violationTags.forEach(tag => formData.append('ViolationTags', tag))
       if (data.notes) formData.append('Notes', data.notes)
       if (data.underlyingEntryPrice) formData.append('UnderlyingEntryPrice', data.underlyingEntryPrice.toString())
       if (data.underlyingExitPrice) formData.append('UnderlyingExitPrice', data.underlyingExitPrice.toString())
@@ -158,24 +160,24 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
             </div>
           </Section>
 
-          {/* Section: Underlying Stock (optional) */}
-          <Section title="Underlying Stock (optional)" hint="Helps the AI evaluate entry/exit timing">
+          {/* Section: Underlying Stock */}
+          <Section title="Underlying Stock" hint="Required for accurate AI analysis">
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Underlying Entry Price">
+              <Field label="Underlying Entry Price" error={errors.underlyingEntryPrice?.message}>
                 <input
                   type="number"
                   step="0.01"
-                  {...register('underlyingEntryPrice', { valueAsNumber: true })}
+                  {...register('underlyingEntryPrice', { required: 'Required', valueAsNumber: true })}
                   className="input"
                   placeholder="e.g. 423.50"
                 />
               </Field>
 
-              <Field label="Underlying Exit Price">
+              <Field label="Underlying Exit Price" error={errors.underlyingExitPrice?.message}>
                 <input
                   type="number"
                   step="0.01"
-                  {...register('underlyingExitPrice', { valueAsNumber: true })}
+                  {...register('underlyingExitPrice', { required: 'Required', valueAsNumber: true })}
                   className="input"
                   placeholder="e.g. 425.80"
                 />
@@ -195,22 +197,37 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
             </Field>
           </Section>
 
-          {/* Section: Self-Rating (1-5 each, sum = up to 20 pts) */}
-          <Section title="Self-Rating" hint="Rate yourself 1-5 in each area (max 20 pts of discipline score)">
-            <div className="space-y-3">
-              <Controller name="entryQuality" control={control} render={({ field }) =>
-                <StarRow label="Entry quality" value={field.value} onChange={field.onChange} />
-              } />
-              <Controller name="exitQuality" control={control} render={({ field }) =>
-                <StarRow label="Exit quality" value={field.value} onChange={field.onChange} />
-              } />
-              <Controller name="riskManagement" control={control} render={({ field }) =>
-                <StarRow label="Risk management" value={field.value} onChange={field.onChange} />
-              } />
-              <Controller name="planAdherence" control={control} render={({ field }) =>
-                <StarRow label="Plan adherence" value={field.value} onChange={field.onChange} />
-              } />
-            </div>
+          {/* Section: Discipline */}
+          <Section title="Discipline" hint="Tag any rules you broke — no tags means a clean trade">
+            <Controller
+              name="violationTags"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-wrap gap-2">
+                  {VIOLATION_TAGS.map(tag => {
+                    const selected = field.value.includes(tag)
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => field.onChange(
+                          selected
+                            ? field.value.filter(t => t !== tag)
+                            : [...field.value, tag]
+                        )}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                          selected
+                            ? 'bg-red-500/20 border-red-500 text-red-300'
+                            : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            />
           </Section>
 
           {/* Section: Screenshots */}
@@ -265,26 +282,6 @@ function Field({ label, error, children }: { label: string; error?: string; chil
       {label && <label className="block text-sm text-gray-400 mb-1">{label}</label>}
       {children}
       {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
-    </div>
-  )
-}
-
-function StarRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm text-gray-300">{label}</span>
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map(n => (
-          <button
-            key={n}
-            type="button"
-            onClick={() => onChange(n)}
-            className="text-gray-600 hover:text-yellow-400 transition"
-          >
-            <Star size={20} fill={n <= value ? '#facc15' : 'none'} className={n <= value ? 'text-yellow-400' : ''} />
-          </button>
-        ))}
-      </div>
     </div>
   )
 }
