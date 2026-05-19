@@ -8,6 +8,7 @@ import { tradesService } from '../services/tradesService'
 import { confirmAction } from '../utils/confirm'
 import { formatPnl, pnlColor, rateColor, scoreColor } from '../utils/format'
 import { useDashboard } from '../hooks/useDashboard'
+import { useMe } from '../hooks/useMe'
 import { usePageTitle } from '../hooks/usePageTitle'
 import TradesTable from '../components/TradesTable'
 import { DashboardSkeleton } from '../components/Skeleton'
@@ -31,6 +32,7 @@ function DashboardPage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { data, isLoading, error } = useDashboard()
+  const { data: me } = useMe()
   const [chartMode, setChartMode] = useState<ChartMode>('equity')
 
   const seedMutation = useMutation({
@@ -63,22 +65,24 @@ function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end gap-2">
-        <button
-          onClick={() => seedMutation.mutate()}
-          disabled={seedMutation.isPending}
-          className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition"
-        >
-          {seedMutation.isPending ? 'Seeding...' : '🧪 Seed test data'}
-        </button>
-        <button
-          onClick={handleDeleteAll}
-          disabled={deleteAllMutation.isPending}
-          className="text-xs bg-red-900/50 hover:bg-red-900 text-red-300 px-3 py-1.5 rounded-lg transition"
-        >
-          {deleteAllMutation.isPending ? 'Deleting...' : '🗑 Delete all trades'}
-        </button>
-      </div>
+      {me?.isAdmin && (
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => seedMutation.mutate()}
+            disabled={seedMutation.isPending}
+            className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition"
+          >
+            {seedMutation.isPending ? 'Seeding...' : '🧪 Seed test data'}
+          </button>
+          <button
+            onClick={handleDeleteAll}
+            disabled={deleteAllMutation.isPending}
+            className="text-xs bg-red-900/50 hover:bg-red-900 text-red-300 px-3 py-1.5 rounded-lg transition"
+          >
+            {deleteAllMutation.isPending ? 'Deleting...' : '🗑 Delete all trades'}
+          </button>
+        </div>
+      )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
