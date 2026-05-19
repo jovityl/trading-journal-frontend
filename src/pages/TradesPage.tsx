@@ -7,12 +7,25 @@ import CreateTradeModal from '../components/CreateTradeModal'
 import TradesTable from '../components/TradesTable'
 import { TableSkeleton } from '../components/Skeleton'
 
+const VIOLATION_TAGS = [
+  'Revenge Trade',
+  'FOMO Entry',
+  'Oversized Position',
+  'Early Exit',
+  'Late Exit',
+  'Chased Entry',
+  'No Clear Setup',
+  'Broke Profit Target',
+  'Overtraded',
+]
+
 const emptyFilters: TradeFilters = {
   ticker: '',
   optionType: '',
   strategy: '',
   fromDate: '',
   toDate: '',
+  violationTag: '',
 }
 
 function TradesPage() {
@@ -43,7 +56,7 @@ function TradesPage() {
 
       {/* Filters */}
       <div className="bg-gray-900 rounded-xl p-4">
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
           <input
             type="text"
             placeholder="Ticker..."
@@ -81,6 +94,16 @@ function TradesPage() {
             onChange={e => updateFilter('toDate', e.target.value)}
             className="input"
           />
+          <select
+            value={filters.violationTag}
+            onChange={e => updateFilter('violationTag', e.target.value)}
+            className="input"
+          >
+            <option value="">All Trades</option>
+            {VIOLATION_TAGS.map(tag => (
+              <option key={tag} value={tag}>{tag}</option>
+            ))}
+          </select>
         </div>
         {hasActiveFilters && (
           <button

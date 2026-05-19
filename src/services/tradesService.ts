@@ -7,6 +7,7 @@ export interface TradeFilters {
   strategy?: string
   fromDate?: string
   toDate?: string
+  violationTag?: string
 }
 
 export interface ChatMessage {
