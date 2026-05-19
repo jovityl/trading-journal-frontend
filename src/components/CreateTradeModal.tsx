@@ -58,7 +58,7 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
       formData.append('ExitPrice', data.exitPrice.toString())
       formData.append('Quantity', data.quantity.toString())
       formData.append('Dte', data.dte.toString())
-      formData.append('TradeDate', new Date(data.tradeDate).toISOString())
+      formData.append('TradeDate', new Date(data.tradeDate + 'T12:00:00').toISOString())
       data.violationTags.forEach(tag => formData.append('ViolationTags', tag))
       if (data.notes) formData.append('Notes', data.notes)
       if (data.underlyingEntryPrice) formData.append('UnderlyingEntryPrice', data.underlyingEntryPrice.toString())
