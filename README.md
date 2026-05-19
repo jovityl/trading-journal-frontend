@@ -1,6 +1,6 @@
 # Trading Journal
 
-> An AI-powered options trading journal that scores trade discipline using manual checks + Claude chart analysis.
+> An AI-powered options trading journal with violation tag discipline tracking and Claude chart analysis.
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -22,11 +22,13 @@
 ## ✨ Features
 
 - 🔐 **Auth0 login** — Google + email/password
-- 📊 **Dashboard** — P&L, win rate, discipline score, 30-day chart, recent trades
+- 📊 **Dashboard** — P&L, win rate, discipline score, equity curve, 30-day P&L chart, recent trades
+- 📈 **Discipline analytics** — violation tag frequency chart and clean trade rate, toggleable on the dashboard
 - 📝 **Trade logging** — full trade form with chart + IBKR screenshot upload
-- 🤖 **AI scoring** — Claude analyzes your chart and scores entry/exit quality (0-80)
-- ✅ **Discipline tracking** — manual ticks for stop loss, profit target, position sizing, DTE (0-20)
-- 🔍 **Filters** — by ticker, option type, strategy, date range
+- 🤖 **AI scoring** — Claude analyzes your uploaded chart and scores entry/exit quality (0-100)
+- 🏷 **Violation tags** — tag behavioral mistakes (FOMO, revenge trade, oversized position, etc.) per trade; no tags = clean trade
+- 🔍 **Filters** — by ticker, option type, strategy, date range, and violation tag
+- 💬 **AI trade chat** — ask Claude questions about any trade using its context
 - ⚙️ **Settings** — daily loss/profit limits with dashboard alerts
 
 ## 🛠 Tech Stack
@@ -82,15 +84,25 @@
 
 ```
 src/
-├── components/     # Reusable components (modals, etc)
-├── pages/          # Full pages (Dashboard, Trades, Settings...)
+├── components/     # Reusable components (modals, tables, etc)
+├── pages/          # Full pages (Dashboard, Trades, Trade Detail, Settings...)
 ├── layout/         # App shell (sidebar + main area)
-├── services/       # Axios API instance
-├── hooks/          # Custom React hooks (useAuthToken)
+├── services/       # Axios API instance + service functions
+├── hooks/          # Custom React hooks (useDashboard, useTrades, useMe...)
 ├── types/          # TypeScript interfaces
+├── utils/          # Formatting helpers (pnlColor, scoreColor, etc)
 ├── App.tsx         # Routing
 └── main.tsx        # Entry point + providers
 ```
+
+## 🏷 Discipline System
+
+Trades are assessed using two independent scores:
+
+- **Discipline Score** — derived from violation tags you select when logging a trade. 0 tags = 100 (clean), 1 = 70, 2 = 40, 3+ = 10. Shown as a badge on the trade detail page.
+- **AI Score** — Claude analyzes the uploaded chart screenshot and scores 0-100 based on entry/exit quality and trade setup.
+
+The dashboard's **Discipline** tab shows which violation tags appear most often across all your trades, and your overall clean trade rate.
 
 ## 🔗 Related
 
