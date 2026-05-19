@@ -80,6 +80,10 @@
 
 5. Open [http://localhost:5173](http://localhost:5173)
 
+### Docker
+
+The frontend is included in the backend's `docker-compose.yml`. To run the full stack (API + DB + frontend) in Docker, follow the Docker setup in the [backend repository](https://github.com/jovityl/trading-journal-backend). The frontend will be available at `http://localhost:3000`.
+
 ## 📂 Project Structure
 
 ```
