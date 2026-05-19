@@ -1,5 +1,6 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { tradesService } from '../services/tradesService'
 import FileDropzone from './FileDropzone'
@@ -20,21 +21,25 @@ interface FormData {
   dte: number
   tradeDate: string
   notes?: string
-  hasStopLoss: boolean
-  hasProfitTarget: boolean
-  hasPositionSizing: boolean
-  hasAppropriateDte: boolean
+  entryQuality: number
+  exitQuality: number
+  riskManagement: number
+  planAdherence: number
   ibkrScreenshot?: FileList
   chartScreenshot?: FileList
 }
 
 function CreateTradeModal({ onClose }: CreateTradeModalProps) {
   const queryClient = useQueryClient()
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       tradeDate: new Date().toISOString().split('T')[0],
       optionType: 'Call',
       strategy: 'Breakout + Retest',
+      entryQuality: 3,
+      exitQuality: 3,
+      riskManagement: 3,
+      planAdherence: 3,
     }
   })
 
@@ -49,10 +54,10 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
       formData.append('Quantity', data.quantity.toString())
       formData.append('Dte', data.dte.toString())
       formData.append('TradeDate', new Date(data.tradeDate).toISOString())
-      formData.append('HasStopLoss', data.hasStopLoss.toString())
-      formData.append('HasProfitTarget', data.hasProfitTarget.toString())
-      formData.append('HasPositionSizing', data.hasPositionSizing.toString())
-      formData.append('HasAppropriateDte', data.hasAppropriateDte.toString())
+      formData.append('EntryQuality', data.entryQuality.toString())
+      formData.append('ExitQuality', data.exitQuality.toString())
+      formData.append('RiskManagement', data.riskManagement.toString())
+      formData.append('PlanAdherence', data.planAdherence.toString())
       if (data.notes) formData.append('Notes', data.notes)
       if (data.underlyingEntryPrice) formData.append('UnderlyingEntryPrice', data.underlyingEntryPrice.toString())
       if (data.underlyingExitPrice) formData.append('UnderlyingExitPrice', data.underlyingExitPrice.toString())
@@ -190,13 +195,21 @@ function CreateTradeModal({ onClose }: CreateTradeModalProps) {
             </Field>
           </Section>
 
-          {/* Section: Discipline Checks */}
-          <Section title="Discipline Checks (5 pts each)">
-            <div className="grid grid-cols-2 gap-3">
-              <Checkbox label="Had stop loss" {...register('hasStopLoss')} />
-              <Checkbox label="Had profit target" {...register('hasProfitTarget')} />
-              <Checkbox label="Proper position sizing" {...register('hasPositionSizing')} />
-              <Checkbox label="Appropriate DTE" {...register('hasAppropriateDte')} />
+          {/* Section: Self-Rating (1-5 each, sum = up to 20 pts) */}
+          <Section title="Self-Rating" hint="Rate yourself 1-5 in each area (max 20 pts of discipline score)">
+            <div className="space-y-3">
+              <Controller name="entryQuality" control={control} render={({ field }) =>
+                <StarRow label="Entry quality" value={field.value} onChange={field.onChange} />
+              } />
+              <Controller name="exitQuality" control={control} render={({ field }) =>
+                <StarRow label="Exit quality" value={field.value} onChange={field.onChange} />
+              } />
+              <Controller name="riskManagement" control={control} render={({ field }) =>
+                <StarRow label="Risk management" value={field.value} onChange={field.onChange} />
+              } />
+              <Controller name="planAdherence" control={control} render={({ field }) =>
+                <StarRow label="Plan adherence" value={field.value} onChange={field.onChange} />
+              } />
             </div>
           </Section>
 
@@ -256,11 +269,24 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   )
 }
 
-const Checkbox = ({ label, ...rest }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
-  <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-    <input type="checkbox" {...rest} className="accent-blue-600" />
-    {label}
-  </label>
-)
+function StarRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-gray-300">{label}</span>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map(n => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className="text-gray-600 hover:text-yellow-400 transition"
+          >
+            <Star size={20} fill={n <= value ? '#facc15' : 'none'} className={n <= value ? 'text-yellow-400' : ''} />
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default CreateTradeModal

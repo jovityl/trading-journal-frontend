@@ -63,13 +63,23 @@ function TradeDetailPage() {
           <h1 className="text-2xl font-bold">{trade.ticker} — {trade.optionType}</h1>
           <p className="text-gray-400 text-sm">{formatDate(trade.tradeDate)}</p>
         </div>
-        <button
-          onClick={handleDelete}
-          disabled={deleteMutation.isPending}
-          className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium px-4 py-2 rounded-lg transition"
-        >
-          {deleteMutation.isPending ? 'Deleting...' : 'Delete Trade'}
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`https://www.tradingview.com/chart/?symbol=${trade.ticker}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gray-800 hover:bg-gray-700 text-white font-medium px-4 py-2 rounded-lg transition inline-flex items-center gap-1"
+          >
+            📈 Open in TradingView
+          </a>
+          <button
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium px-4 py-2 rounded-lg transition"
+          >
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete Trade'}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -84,13 +94,13 @@ function TradeDetailPage() {
       <div className="bg-gray-900 rounded-xl p-6">
         <h2 className="text-lg font-semibold mb-4">Discipline Score: {trade.disciplineScore}/100</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-          <Check label="Stop loss" value={trade.hasStopLoss} />
-          <Check label="Profit target" value={trade.hasProfitTarget} />
-          <Check label="Position sizing" value={trade.hasPositionSizing} />
-          <Check label="Appropriate DTE" value={trade.hasAppropriateDte} />
+          <RatingRow label="Entry quality" value={trade.entryQuality} />
+          <RatingRow label="Exit quality" value={trade.exitQuality} />
+          <RatingRow label="Risk management" value={trade.riskManagement} />
+          <RatingRow label="Plan adherence" value={trade.planAdherence} />
         </div>
         <div className="mt-4 pt-4 border-t border-gray-800 text-sm text-gray-400">
-          <p>Ticked score: {trade.tickedScore}/20</p>
+          <p>Self-rating: {trade.tickedScore}/20</p>
           <p>AI score: {trade.aiScore}/80</p>
         </div>
       </div>
@@ -161,11 +171,13 @@ function Stat({ label, value, color }: { label: string; value: string; color?: s
   )
 }
 
-function Check({ label, value }: { label: string; value: boolean }) {
+function RatingRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className={`flex items-center gap-2 ${value ? 'text-green-400' : 'text-gray-500'}`}>
-      <span>{value ? '✓' : '✗'}</span>
-      <span>{label}</span>
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-gray-400">{label}</span>
+      <span className="text-yellow-400 font-mono">
+        {'★'.repeat(value)}{'☆'.repeat(5 - value)}
+      </span>
     </div>
   )
 }

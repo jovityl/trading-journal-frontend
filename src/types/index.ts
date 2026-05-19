@@ -14,10 +14,10 @@ export interface TradeDto {
   chartScreenshotUrl?: string
   aiScore: number
   aiFeedback?: string
-  hasStopLoss: boolean
-  hasProfitTarget: boolean
-  hasPositionSizing: boolean
-  hasAppropriateDte: boolean
+  entryQuality: number
+  exitQuality: number
+  riskManagement: number
+  planAdherence: number
   tickedScore: number
   disciplineScore: number
   createdAt: string
