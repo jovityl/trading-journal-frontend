@@ -49,8 +49,8 @@ export const tradesService = {
     await api.post('/api/v1/trades/seed')
   },
 
-  async chat(id: string, messages: ChatMessage[]): Promise<string> {
-    const res = await api.post<BaseResponse<string>>(`/api/v1/trades/${id}/chat`, { messages })
+  async chat(id: string, messages: ChatMessage[], model?: string): Promise<string> {
+    const res = await api.post<BaseResponse<string>>(`/api/v1/trades/${id}/chat`, { messages, model })
     return res.data.data
   },
 }
