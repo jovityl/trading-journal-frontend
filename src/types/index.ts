@@ -29,6 +29,11 @@ export interface ScoreChartDto {
   averageScore: number
 }
 
+export interface ViolationTagStatDto {
+  tag: string
+  count: number
+}
+
 export interface DashboardDto {
   totalPnl: number
   todayPnl: number
@@ -43,6 +48,8 @@ export interface DashboardDto {
   equityCurve: PnlChartDto[]
   scoreChart: ScoreChartDto[]
   recentTrades: TradeDto[]
+  violationTagStats: ViolationTagStatDto[]
+  cleanTradeRate: number
 }
 
 export interface BaseResponse<T> {

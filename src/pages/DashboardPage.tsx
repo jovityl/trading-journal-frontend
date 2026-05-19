@@ -24,7 +24,7 @@ function StatCard({ label, value, icon, valueColor, highlight }: { label: string
   )
 }
 
-type ChartMode = 'equity' | 'daily'
+type ChartMode = 'equity' | 'daily' | 'discipline'
 
 function DashboardPage() {
   usePageTitle('Dashboard')
@@ -130,7 +130,7 @@ function DashboardPage() {
       <div className="bg-gray-900 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">
-            {chartMode === 'equity' ? 'Equity Curve' : 'Daily P&L — Last 30 Days'}
+            {chartMode === 'equity' ? 'Equity Curve' : chartMode === 'daily' ? 'Daily P&L — Last 30 Days' : 'Discipline Analytics'}
           </h2>
           <div className="flex bg-gray-800 rounded-lg p-1">
             <button
@@ -145,10 +145,47 @@ function DashboardPage() {
             >
               Daily
             </button>
+            <button
+              onClick={() => setChartMode('discipline')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition ${chartMode === 'discipline' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              Discipline
+            </button>
           </div>
         </div>
 
-        {chartMode === 'equity' ? (
+        {chartMode === 'discipline' ? (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-gray-400">Most common rule violations — all time</p>
+              <span className="text-sm text-gray-400">
+                Clean trade rate: <span className={`font-semibold ${data.cleanTradeRate >= 70 ? 'text-green-400' : data.cleanTradeRate >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>{data.cleanTradeRate}%</span>
+              </span>
+            </div>
+            {data.violationTagStats.length === 0 ? (
+              <p className="text-gray-500 text-sm">No violation tags logged yet. Tag your mistakes when logging trades to see patterns here.</p>
+            ) : (
+              <div className="space-y-3">
+                {data.violationTagStats.map(stat => {
+                  const max = data.violationTagStats[0].count
+                  const pct = Math.round((stat.count / max) * 100)
+                  return (
+                    <div key={stat.tag} className="flex items-center gap-3">
+                      <span className="text-sm text-gray-300 w-40 shrink-0">{stat.tag}</span>
+                      <div className="flex-1 bg-gray-800 rounded-full h-2">
+                        <div
+                          className="bg-red-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-gray-400 w-6 text-right">{stat.count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        ) : chartMode === 'equity' ? (
           (data.equityCurve ?? []).length === 0 ? (
             <p className="text-gray-500 text-sm">No data yet.</p>
           ) : (
