@@ -3,8 +3,9 @@ import { NavLink } from 'react-router-dom'
 function AdminTabs() {
   return (
     <div className="flex gap-1 border-b border-gray-800 mb-6">
-      <Tab to="/admin/prompts">Prompts</Tab>
+      <Tab to="/admin/users">Users</Tab>
       <Tab to="/admin/usage">Token Usage</Tab>
+      <Tab to="/admin/prompts">Prompts</Tab>
     </div>
   )
 }

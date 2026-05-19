@@ -52,4 +52,21 @@ export const adminService = {
     const res = await api.get<BaseResponse<UsageSummaryDto>>('/api/v1/admin/usage')
     return res.data.data
   },
+
+  async getUsers(): Promise<AdminUserDto[]> {
+    const res = await api.get<BaseResponse<AdminUserDto[]>>('/api/v1/admin/users')
+    return res.data.data
+  },
+}
+
+export interface AdminUserDto {
+  id: string
+  email: string
+  displayName: string
+  isAdmin: boolean
+  createdAt: string
+  tradeCount: number
+  totalPnl: number
+  totalAiCalls: number
+  totalAiCost: number
 }
