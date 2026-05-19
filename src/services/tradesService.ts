@@ -53,4 +53,21 @@ export const tradesService = {
     const res = await api.post<BaseResponse<string>>(`/api/v1/trades/${id}/chat`, { messages, model })
     return res.data.data
   },
+
+  async getMessages(id: string): Promise<TradeMessageDto[]> {
+    const res = await api.get<BaseResponse<TradeMessageDto[]>>(`/api/v1/trades/${id}/messages`)
+    return res.data.data
+  },
+
+  async clearMessages(id: string): Promise<void> {
+    await api.delete(`/api/v1/trades/${id}/messages`)
+  },
+}
+
+export interface TradeMessageDto {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  model?: string
+  createdAt: string
 }
